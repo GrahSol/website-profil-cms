@@ -1,14 +1,11 @@
 # Company Profile CMS
-
 Sistem CMS lengkap untuk mengelola website profil perusahaan dengan panel admin yang powerful.
 
 ## ✨ Fitur Utama
 
-- **Panel Admin** - Kontrol penuh atas konten website
-- **Manajemen Multi-modul** - Statistik, Produk, Tim, Testimoni, dll
-- **Role-based Access Control** - Super Admin, Admin, dan User
-- **Sistem Upload File** - Manajemen gambar dan dokumen
-- **Responsive Design** - Berfungsi di semua perangkat
+- **Panel Administrasi:** Antarmuka terpusat untuk mengelola seluruh konten website secara intuitif.
+- **Manajemen Konten Dinamis:** Fungsionalitas CRUD (Create, Read, Update, Delete) penuh untuk berbagai modul konten.
+- **Kontrol Akses Berbasis Peran (RBAC):** Sistem otorisasi yang fleksibel untuk menentukan hak akses pengguna
 
 ## 🛠️ Tech Stack
 
@@ -20,41 +17,46 @@ Sistem CMS lengkap untuk mengelola website profil perusahaan dengan panel admin 
 
 ## 🚀 Instalasi Cepat
 
-### 1. Clone & Install
+### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/yourusername/company-profile-cms.git
+git clone https://github.com/GrahSol/company-profile-cms.git
 cd company-profile-cms
 composer install
 npm install
-2. Setup Environment
-bash
+```
+### 2. Setup Environment
+```bash
 cp .env.example .env
 php artisan key:generate
-3. Setup Database
+```
+
+### 3. Setup Database
 Edit file .env:
 
-env
+```env
 DB_DATABASE=company_profile_cms
 DB_USERNAME=root
 DB_PASSWORD=
-4. Jalankan Migrasi
-bash
+```
+### 4. Migrasi Database
+```bash
 php artisan migrate:fresh --seed
 php artisan storage:link
-5. Mulai Development
-bash
-# Terminal 1
+
+```
+### 5. Development Server
+```bash
+# Terminal 1 - Backend Server
 php artisan serve
 
-# Terminal 2
+# Terminal 2 - Frontend Assets (Development)
 npm run dev
-6. Akses Aplikasi
-URL: http://localhost:8000
 
+```
+### 6. Akses Aplikasi
+```
 Login Admin:
 
 Email: super@admin.com
 
 Password: 123123123
-
-
