@@ -4,19 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
 use Illuminate\Database\Eloquent\Model;
-
 
 class OurPrinciple extends Model
 {
-    use HasFactory, softDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'subtitle',
-        'name',
+        'name',        
+        'subtitle',   
         'thumbnail',
         'icon'
-
     ];
 }

@@ -12,10 +12,20 @@ class CompanyKeypoint extends Model
 
     protected $fillable = [
         'company_about_id',
-        'keypoint'
+        'name',
+        'achievement',
+        'thumbnail', 
+        'type'
     ];
 
-    public function about()
+    // Tambah properti untuk default values
+    protected $attributes = [
+        'achievement' => '',
+        'thumbnail' => '',
+        'type' => ''
+    ];
+
+    public function companyAbout()
     {
         return $this->belongsTo(CompanyAbout::class);
     }

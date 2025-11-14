@@ -5,78 +5,76 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Requests\StoreProductRequest; 
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\StoreProductRequest;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
         $products = Product::orderByDesc('id')->paginate(10);
         return view('admin.products.index', compact('products'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
         return view('admin.products.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreProductRequest $request)
     {
         DB::transaction(function() use($request){
             $validated = $request->validated();
 
             if($request->hasFile('thumbnail')){
-                $thumbnailPath = $request->file('thumbnail')->store('thumbnail', 'public');
+                $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
                 $validated['thumbnail'] = $thumbnailPath;
             }
-            $newProduct = Product::create($validated);
-            
 
+            Product::create($validated);
         });
         return redirect()->route('admin.products.index');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Product $product)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Product $product)
     {
-        return view('admin.products.edit',compact('product'));
+        return view('admin.products.edit', compact('product'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Product $product)
     {
-        //
+        DB::transaction(function() use($request, $product) {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'tagline' => 'required|string|max:255',
+                'about' => 'required|string',
+                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            ]);
+
+            if($request->hasFile('thumbnail')) {
+                if($product->thumbnail) {
+                    Storage::delete('public/' . $product->thumbnail);
+                }
+                $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+                $validated['thumbnail'] = $thumbnailPath;
+            } else {
+                $validated['thumbnail'] = $product->thumbnail;
+            }
+
+            $product->update($validated);
+        });
+
+        return redirect()->route('admin.products.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Product $product)
     {
-       DB::transaction(function() use ($product){
+        DB::transaction(function() use ($product){
             $product->delete();
         });
         return redirect()->route('admin.products.index');

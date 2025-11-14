@@ -4,33 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\OurTeam;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; 
-use App\Http\Requests\StoreTeamRequest; 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\StoreTeamRequest;
 
 class OurTeamController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-       $teams = OurTeam::orderByDesc('id')->paginate(10);
-       return view('admin.teams.index', compact('teams'));
-    }        //
+        $teams = OurTeam::orderByDesc('id')->paginate(10);
+        return view('admin.teams.index', compact('teams'));
+    }
 
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
         return view('admin.teams.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreTeamRequest $request)
     {
         DB::transaction(function() use($request){
@@ -41,41 +31,48 @@ class OurTeamController extends Controller
                 $validated['avatar'] = $avatarPath;
             }
 
-            $newTeam = OurTeam::create($validated);
-
-
+            OurTeam::create($validated);
         });
 
         return redirect()->route('admin.teams.index');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(OurTeam $ourTeam)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(OurTeam $team)
     {
-        return view('admin.teams.edit',compact('team'));
+        return view('admin.teams.edit', compact('team'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, OurTeam $ourTeam)
+    public function update(Request $request, OurTeam $team)
     {
-        //
+        DB::transaction(function() use($request, $team) {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'occupation' => 'required|string|max:255',
+                'location' => 'required|string|max:255',
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            ]);
+
+            if($request->hasFile('avatar')) {
+                if($team->avatar) {
+                    Storage::delete('public/' . $team->avatar);
+                }
+                $avatarPath = $request->file('avatar')->store('avatar', 'public');
+                $validated['avatar'] = $avatarPath;
+            } else {
+                $validated['avatar'] = $team->avatar;
+            }
+
+            $team->update($validated);
+        });
+
+        return redirect()->route('admin.teams.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(OurTeam $team)
     {
         DB::transaction(function() use ($team){

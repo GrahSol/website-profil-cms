@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Controllers; 
-use App\Http\Requests\StoreAboutRequest; 
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreAboutRequest;
 use App\Models\CompanyAbout;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // ← TAMBAHKAN INI
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CompanyAboutController extends Controller
 {
@@ -40,15 +42,18 @@ class CompanyAboutController extends Controller
 
             $newAbout = CompanyAbout::create($validated);
 
-            if(!empty($validated['keypoints'])) {
-            foreach($validated['keypoints'] as $keypoint) {
-                if(!empty(trim($keypoint))) {
-                    $newAbout->keypoints()->create([
-                        'keypoint' => $keypoint 
-                    ]);
+            if(isset($validated['keypoints']) && is_array($validated['keypoints'])) {
+                foreach($validated['keypoints'] as $keypoint) {
+                    if(!empty(trim($keypoint))) {
+                        $newAbout->keypoints()->create([
+                            'name' => $keypoint,  
+                            'achievement' => '',
+                            'thumbnail' => '',
+                            'type' => ''
+                        ]);
+                    }
                 }
             }
-        }
         });
 
         return redirect()->route('admin.abouts.index');
@@ -59,7 +64,8 @@ class CompanyAboutController extends Controller
      */
     public function show(CompanyAbout $companyAbout)
     {
-        //
+        // Jika tidak digunakan, bisa dikosongkan atau dihapus
+        abort(404);
     }
 
     /**
@@ -75,7 +81,48 @@ class CompanyAboutController extends Controller
      */
     public function update(Request $request, CompanyAbout $companyAbout)
     {
-        //
+        DB::transaction(function() use($request, $companyAbout) {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'type' => 'required|string|max:255',
+                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'keypoints' => 'nullable|array',
+                'keypoints.*' => 'nullable|string|max:255'
+            ]);
+
+            if($request->hasFile('thumbnail')) {
+                // Hapus thumbnail lama jika ada
+                if($companyAbout->thumbnail && Storage::exists('public/' . $companyAbout->thumbnail)) {
+                    Storage::delete('public/' . $companyAbout->thumbnail);
+                }
+                $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+                $validated['thumbnail'] = $thumbnailPath;
+            } else {
+                $validated['thumbnail'] = $companyAbout->thumbnail;
+            }
+
+            $companyAbout->update($validated);
+
+            // Update keypoints
+            if(isset($validated['keypoints']) && is_array($validated['keypoints'])) {
+                // Hapus keypoints lama
+                $companyAbout->keypoints()->delete();
+                
+                // Buat keypoints baru
+                foreach($validated['keypoints'] as $keypoint) {
+                    if(!empty(trim($keypoint))) {
+                        $companyAbout->keypoints()->create([
+                            'name' => $keypoint,
+                            'achievement' => '',
+                            'thumbnail' => '',
+                            'type' => ''
+                        ]);
+                    }
+                }
+            }
+        });
+
+        return redirect()->route('admin.abouts.index');
     }
 
     /**

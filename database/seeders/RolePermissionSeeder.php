@@ -41,7 +41,7 @@ class RolePermissionSeeder extends Seeder
         $superAdminRole->syncPermissions($permissions);
 
         $user = User::create([
-            'name' => 'FaizComp',
+            'name' => 'Company',
             'email' => 'super@admin.com', // Perbaikan typo: admim -> admin
             'password' => bcrypt('123123123')
         ]);

@@ -5,85 +5,109 @@ namespace App\Http\Controllers;
 use App\Models\OurPrinciple;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Requests\StorePrincipleRequest; 
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\StorePrincipleRequest;
 
 class OurPrincipleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-       $principles = OurPrinciple::orderByDesc('id')->paginate(10);
+        $principles = OurPrinciple::orderByDesc('id')->paginate(10);
         return view('admin.principles.index', compact('principles'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
         return view('admin.principles.create');
-        
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StorePrincipleRequest$request)
+    public function store(StorePrincipleRequest $request)
     {
         DB::transaction(function() use($request){
             $validated = $request->validated();
 
             if($request->hasFile('thumbnail')){
-                $thumbnailPath = $request->file('thumbnail')->store('thumbnail', 'public');
+                $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
                 $validated['thumbnail'] = $thumbnailPath;
             }
 
             if($request->hasFile('icon')){
-                $iconPath = $request->file('icon')->store('icon', 'public');
+                $iconPath = $request->file('icon')->store('icons', 'public');
                 $validated['icon'] = $iconPath;
             }
 
-            $newPrinciple = OurPrinciple::create($validated);
-
+            OurPrinciple::create($validated);
         });
+        
         return redirect()->route('admin.principles.index');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(OurPrinciple $ourPrinciple)
+    public function show($id)
     {
-        //
+        $principle = OurPrinciple::findOrFail($id);
+        return view('admin.principles.show', compact('principle'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(OurPrinciple $ourPrinciple)
+    public function edit($id)
     {
-        //
+        $principle = OurPrinciple::findOrFail($id);
+        return view('admin.principles.edit', compact('principle'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, OurPrinciple $principle)
+    public function update(Request $request, $id)
     {
-       return view('admin.principles.edit',compact('principle'));
+        $principle = OurPrinciple::findOrFail($id);
+        
+        DB::transaction(function() use($request, $principle) {
+            
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'subtitle' => 'required|string',
+                'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            ]);
+
+            if($request->hasFile('thumbnail')) {
+                if($principle->thumbnail) {
+                    Storage::delete('public/' . $principle->thumbnail);
+                }
+                $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+                $validated['thumbnail'] = $thumbnailPath;
+            } else {
+                $validated['thumbnail'] = $principle->thumbnail;
+            }
+
+            if($request->hasFile('icon')) {
+                if($principle->icon) {
+                    Storage::delete('public/' . $principle->icon);
+                }
+                $iconPath = $request->file('icon')->store('icons', 'public');
+                $validated['icon'] = $iconPath;
+            } else {
+                $validated['icon'] = $principle->icon;
+            }
+
+            $principle->update($validated);
+        });
+
+        return redirect()->route('admin.principles.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(OurPrinciple $principle)
+    public function destroy($id)
     {
+        $principle = OurPrinciple::findOrFail($id);
+        
         DB::transaction(function() use ($principle){
+            if($principle->thumbnail) {
+                Storage::delete('public/' . $principle->thumbnail);
+            }
+            if($principle->icon) {
+                Storage::delete('public/' . $principle->icon);
+            }
+            
             $principle->delete();
         });
+        
         return redirect()->route('admin.principles.index');
     }
 }

@@ -1,1 +1,0 @@
-<p>ini adalah halaman home paage</p>
