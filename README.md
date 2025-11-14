@@ -1,5 +1,5 @@
 # Company Profile CMS
-Sistem CMS untuk mengelola website profil perusahaan dengan panel admin. Project portfolio backend development dengan fokus pada clean architecture dan Laravel best practices.
+Sistem CMS untuk mengelola website profil perusahaan dengan panel admin.
 
 ## 🛠️ Tech Stack
 
