@@ -1,17 +1,10 @@
 # Company Profile CMS
-Sistem CMS lengkap untuk mengelola website profil perusahaan dengan panel admin yang powerful.
-
-## ✨ Fitur Utama
-
-- **Panel Administrasi:** Antarmuka terpusat untuk mengelola seluruh konten website secara intuitif.
-- **Manajemen Konten Dinamis:** Fungsionalitas CRUD (Create, Read, Update, Delete) penuh untuk berbagai modul konten.
-- **Kontrol Akses Berbasis Peran (RBAC):** Sistem otorisasi yang fleksibel untuk menentukan hak akses pengguna
+Sistem CMS untuk mengelola website profil perusahaan dengan panel admin. Project portfolio backend development dengan fokus pada clean architecture dan Laravel best practices.
 
 ## 🛠️ Tech Stack
 
 - **Backend:** Laravel 11, PHP 8.4
-- **Frontend:** Blade, Tailwind CSS, JavaScript
-- **Database:** MySQL
+- **Database:** MySQL 8.0
 - **Authentication:** Laravel Breeze
 - **Authorization:** Spatie Laravel Permission
 
@@ -53,10 +46,14 @@ php artisan serve
 npm run dev
 
 ```
-### 6. Akses Aplikasi
+### 6. Demo
 ```
-Login Admin:
+Login pada http://127.0.0.1:8000/login
 
 Email: super@admin.com
 
 Password: 123123123
+
+```
+
+
